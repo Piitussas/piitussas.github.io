@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Fausto, Programmer & 3D Animator. Preséntate con Fausto y entra a su portfolio.">
+<meta property="og:title" content="Fausto · Programmer & 3D Animator">
+<meta property="og:description" content="Programación y animación 3D. Portfolio en The Rookies.">
+<link rel="icon" href="char/open-quiet.webp" type="image/webp">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Fausto 3D Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one phone-first screen = a 3D viewport. Character stands on a studio cyclorama,
+   game-style dialogue box below, portfolio card slides in when the intro ends. */
+:root{
+  --cyc:#d6dbe2;        /* studio backdrop */
+  --cyc-floor:#c3c9d2;
+  --ink:#151a22;        /* text + dialogue box */
+  --muted:#5b6574;
+  --panel:#151a22;
+  --panel-fg:#eef1f5;
+  --accent:#e8892a;     /* key light / brand */
+  --line:rgba(21,26,34,.14);
+  --f-display:"Bebas Neue","Oswald","Arial Narrow",sans-serif;
+  --f-body:"Barlow","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --cyc:#1d222b; --cyc-floor:#161a21; --ink:#eef1f5; --muted:#98a2b1;
+  --panel:#0e1117; --panel-fg:#eef1f5; --accent:#f39a3d;
+  --line:rgba(238,241,245,.12); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --cyc:#1d222b; --cyc-floor:#161a21; --ink:#eef1f5; --muted:#98a2b1;
+  --panel:#0e1117; --panel-fg:#eef1f5; --accent:#f39a3d;
+  --line:rgba(238,241,245,.12); color-scheme:dark }
+
+html,body{height:100%}
+body{
+  background:radial-gradient(120% 70% at 50% 30%, var(--cyc) 0%, var(--cyc) 55%, var(--cyc-floor) 100%);
+  background-color:var(--cyc);
+  color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.5;
+  padding-inline:16px; padding-block:0;
+}
+.wrap{max-width:440px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;gap:14px;padding-block:14px 20px}
+
+/* viewport HUD */
+.hud{display:flex;justify-content:space-between;gap:12px;font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.02em}
+.hud b{color:var(--ink);font-weight:500}
+.brand{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,8.4vw,38px);line-height:.95;letter-spacing:.04em;color:var(--ink);display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;margin:0;text-wrap:balance}
+.brand span{color:var(--accent)}
+
+/* stage */
+.stage{position:relative;display:flex;justify-content:center;margin-bottom:-34px;z-index:0}
+.avatar{position:relative;width:min(80vw,340px);max-width:100%;aspect-ratio:1;transform-origin:50% 100%;transition:transform .09s ease-out}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.avatar.hop{transform:translateY(-6px)}
+.stage::after{content:"";position:absolute;left:50%;bottom:6px;width:62%;height:16px;transform:translateX(-50%);border-radius:50%;background:var(--ink);opacity:.1;filter:blur(4px);z-index:-1}
+.dialog{z-index:1}
+
+/* dialogue box */
+.dialog{background:var(--panel);color:var(--panel-fg);border-radius:6px;padding:16px 18px 14px;position:relative;cursor:pointer;
+  box-shadow:0 0 0 1px rgba(255,255,255,.04) inset, 0 10px 30px -14px rgba(0,0,0,.5)}
+.dialog:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.speaker{font-family:var(--f-display);font-size:22px;letter-spacing:.06em;color:var(--accent);line-height:1;margin:0 0 6px}
+.line{display:grid;margin:0;font-size:17px;line-height:1.45}
+.line > span{grid-area:1/1;min-width:0;overflow-wrap:break-word}
+.line .ghost,.line .rest{visibility:hidden}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sound{position:absolute;top:4px;right:0;z-index:2;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border-radius:18px;border:1px solid var(--line);background:var(--cyc);color:var(--ink);font-family:var(--f-mono);font-size:11px;cursor:pointer}
+.sound:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sound svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sound[aria-pressed="false"] .wave{display:none}
+.sound[aria-pressed="true"] .mute{display:none}
+.dialog-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-family:var(--f-mono);font-size:11px;color:#98a2b1}
+.next{display:inline-flex;gap:6px;align-items:center}
+.next i{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--accent);animation:nudge 1s infinite}
+@keyframes nudge{50%{transform:translateY(3px)}}
+.skip{background:none;border:0;color:#98a2b1;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
+.skip:focus-visible{outline:2px solid var(--accent)}
+.replay{margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border-radius:17px;border:1px solid var(--accent);background:transparent;color:var(--accent);font:inherit;font-size:12px;cursor:pointer}
+.replay svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.replay:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* portfolio card */
+.card{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:color-mix(in srgb,var(--cyc) 70%,var(--panel-fg) 30%);animation:rise .5s cubic-bezier(.2,.8,.2,1)}
+@supports not (background:color-mix(in srgb,red,blue)){.card{background:var(--cyc)}}
+@keyframes rise{from{transform:translateY(16px);opacity:.3}}
+.thumb{position:relative;display:block;aspect-ratio:900/337;max-width:100%;overflow:hidden;background:var(--panel)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .tag{position:absolute;left:10px;top:10px;font-family:var(--f-mono);font-size:10px;color:#fff;background:rgba(0,0,0,.45);padding:3px 6px;border-radius:3px}
+.card-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.card-body h2{font-family:var(--f-display);font-weight:400;font-size:28px;letter-spacing:.04em;line-height:1;margin:0;text-wrap:balance}
+.card-body p{margin:0;color:var(--muted);font-size:15px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{flex:1 1 140px;display:inline-flex;justify-content:center;align-items:center;min-height:48px;border-radius:5px;font-family:var(--f-display);font-size:21px;letter-spacing:.06em;text-decoration:none;cursor:pointer;border:1.5px solid var(--ink);background:transparent;color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1208}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.btn[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+.small{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.small a{color:var(--ink)}
+
+.timeline{display:flex;gap:4px;align-items:center;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+.timeline .bar{flex:1;height:3px;background:var(--line);border-radius:2px;position:relative;overflow:hidden}
+.timeline .bar i{position:absolute;inset:0 auto 0 0;width:0;background:var(--accent);transition:width .4s}
+
+@media (prefers-reduced-motion: reduce){
+  .next i,.card{animation:none}
+}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <h1 class="brand">FAUSTO <span>PROGRAMMER &amp; 3D ANIMATOR</span></h1>
+
+  <div class="stage" id="stage">
+    <button class="sound" id="sound" type="button" aria-pressed="true" aria-label="Sonido de voz">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="mute" d="M17 9l5 6M22 9l-5 6"/></svg>
+      <span id="soundLabel">sonido</span>
+    </button>
+    <div class="avatar" id="avatar" role="img" aria-label="Fausto, un hurón con gafas de sol y camiseta de Argentina comiendo galletas">
+      <img src="char/open-quiet.webp" data-k="open-quiet" alt="">
+      <img src="char/open-talk.webp" data-k="open-talk" alt="" hidden>
+      <img src="char/closed-quiet.webp" data-k="closed-quiet" alt="" hidden>
+      <img src="char/closed-talk.webp" data-k="closed-talk" alt="" hidden>
+    </div>
+  </div>
+
+  <div class="dialog" id="dialog" tabindex="0" role="button" aria-label="Siguiente frase">
+    <p class="speaker">FAUSTO</p>
+    <p class="line" id="lineBox"><span id="line" aria-hidden="true">¡Hola! Soy Fausto. Gracias por escanear el código.</span></p>
+    <p class="sr" id="live" aria-live="polite"></p>
+    <div class="dialog-foot">
+      <span class="next" id="nextHint"><i></i>toca para seguir</span>
+      <button class="skip" id="skip" type="button">Saltar intro</button>
+      <button class="replay" id="replay" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg>Volver a escuchar</button>
+    </div>
+  </div>
+
+  <div class="timeline" aria-hidden="true">
+    <span>1</span><span class="bar"><i id="progress"></i></span><span id="total">4</span>
+  </div>
+
+  <section class="card" id="card" hidden aria-labelledby="cardTitle">
+    <a class="thumb" id="thumbLink" href="https://www.therookies.co/u/Piitussas" target="_blank" rel="noopener" aria-label="Abrir mi portfolio en The Rookies">
+      <img src="char/portfolio-thumb.webp" alt="Portada de mi portfolio en The Rookies">
+      <span class="tag">therookies.co</span>
+    </a>
+    <div class="card-body">
+      <h2 id="cardTitle">Mi portfolio en The Rookies</h2>
+      <p>Videojuegos como Khao y Roller Hunter, entornos estilizados y animaciones de combate en 3D.</p>
+      <div class="actions">
+        <a class="btn primary" id="go" href="#" target="_blank" rel="noopener">Ver portfolio</a>
+        <button class="btn" id="no" type="button">Ahora no</button>
+      </div>
+      <span class="small" id="note" hidden></span>
+    </div>
+  </section>
+</div>
+
+<script>
+// ===== Edita aquí =====
+const PORTFOLIO_URL = "https://www.therookies.co/u/Piitussas";
+const LINES = [
+  "¡Hola! Soy Fausto. Gracias por escanear el código.",
+  "Me especializo en dos cosas: programación y animación 3D.",
+  "Me gusta juntar las dos: escribir el código y dar vida a lo que se mueve en pantalla.",
+  "Ahora mismo estoy terminando un Grado Superior de Animación 3D y Entornos de Videojuegos en Florida Universitària, en Valencia.",
+  "También he hecho prácticas en Valentia Studio, donde creé Roller Hunter, un proyecto que tienes publicado en mi portfolio.",
+  "He preparado una muestra de mi trabajo. ¿Quieres echarle un vistazo?"
+];
+const DECLINE = "¡Sin problema! Si cambias de idea, vuelve a escanear el código cuando quieras.";
+// ======================
+
+const $ = id => document.getElementById(id);
+const lineEl=$("line"), stage=$("stage"), card=$("card"), dialog=$("dialog"),
+      progress=$("progress"), go=$("go"), note=$("note");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+$("total").textContent = LINES.length;
+
+let i=0, typing=false, timer=null, full="";
+
+// ---- Avatar estilo veadotube: 4 frames (ojos abiertos/cerrados × boca abierta/cerrada)
+const avatar=$("avatar");
+const frames={}; avatar.querySelectorAll("img").forEach(im=>frames[im.dataset.k]=im);
+let eyesClosed=false, mouthOpen=false, flapTimer=null, current="open-quiet";
+function render(){
+  const k=(eyesClosed?"closed":"open")+"-"+(mouthOpen?"talk":"quiet");
+  if(k===current) return;
+  frames[current].hidden=true; frames[k].hidden=false; current=k;
+}
+function setMouth(open){
+  if(open && !mouthOpen && !reduce){ avatar.classList.add("hop"); setTimeout(()=>avatar.classList.remove("hop"),90); }
+  mouthOpen=open; render();
+}
+function startFlap(){
+  stopFlap();
+  const tick=()=>{ setMouth(!mouthOpen); flapTimer=setTimeout(tick, 90+Math.random()*90); };
+  tick();
+}
+function stopFlap(){ clearTimeout(flapTimer); flapTimer=null; setMouth(false); }
+(function blinkLoop(){
+  setTimeout(()=>{
+    eyesClosed=true; render();
+    setTimeout(()=>{ eyesClosed=false; render(); blinkLoop(); }, 150);
+  }, 2200+Math.random()*3000);
+})();
+
+function setProgress(){
+  progress.style.width = ((i+1)/LINES.length*100)+"%";
+}
+// ---- Texto: se reserva el hueco de la frase completa para que nada salte al escribir
+const lineBox=$("lineBox"), live=$("live");
+[...LINES, DECLINE].forEach(t=>{ const g=document.createElement("span"); g.className="ghost"; g.setAttribute("aria-hidden","true"); g.textContent=t; lineBox.prepend(g); });
+const restEl=document.createElement("span"); restEl.className="rest";
+function paint(text,n){
+  lineEl.textContent=text.slice(0,n);
+  if(n<text.length){ restEl.textContent=text.slice(n); lineEl.append(restEl); }
+}
+
+// ---- Voz: pitidos agudos tipo "animalese" con Web Audio
+let ctx=null, soundOn=true;
+try{ soundOn = localStorage.getItem("fausto-sound")!=="off"; }catch(e){}
+const soundBtn=$("sound");
+function syncSound(){ soundBtn.setAttribute("aria-pressed", String(soundOn)); $("soundLabel").textContent = soundOn ? "sonido" : "silencio"; }
+syncSound();
+function unlockAudio(){
+  if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; } }
+  if(ctx.state==="suspended") ctx.resume().catch(()=>{});
+}
+document.addEventListener("pointerdown", unlockAudio);
+document.addEventListener("keydown", unlockAudio);
+soundBtn.addEventListener("click", e=>{
+  e.stopPropagation(); soundOn=!soundOn; syncSound();
+  try{ localStorage.setItem("fausto-sound", soundOn?"on":"off"); }catch(err){}
+});
+function blip(ch){
+  if(!soundOn || !ctx || ctx.state!=="running") return;
+  if(/[\s.,;:!?¡¿"()]/.test(ch)) return;
+  const t=ctx.currentTime;
+  const code=ch.toLowerCase().charCodeAt(0);
+  const f=820 + (code % 9)*38 + Math.random()*40;   // agudo, con variación por letra
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type="square"; o.frequency.setValueAtTime(f,t); o.frequency.exponentialRampToValueAtTime(f*0.86,t+0.06);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.045,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+0.065);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+0.08);
+}
+
+function type(text, done){
+  clearInterval(timer); full=text; live.textContent=text;
+  if(reduce){ paint(text,text.length); done&&done(); return; }
+  typing=true; startFlap(); paint(text,0);
+  let n=0;
+  timer=setInterval(()=>{
+    n+=1; paint(text,n);
+    if(n%2===1) blip(text[n-1]);
+    if(n>=text.length){ finish(); done&&done(); }
+  },32);
+}
+function finish(){
+  clearInterval(timer); typing=false; stopFlap(); paint(full,full.length);
+}
+function showCard(){
+  if(!card.hidden) return;
+  card.hidden=false; $("nextHint").hidden=true; $("skip").hidden=true; $("replay").hidden=false;
+  dialog.removeAttribute("role"); dialog.removeAttribute("tabindex");
+  card.scrollIntoView({behavior: reduce?"auto":"smooth", block:"nearest"});
+}
+function advance(){
+  if(typing){ finish(); if(i===LINES.length-1) showCard(); return; }
+  if(i < LINES.length-1){
+    i++; setProgress();
+    type(LINES[i], ()=>{ if(i===LINES.length-1) showCard(); });
+  } else showCard();
+}
+dialog.addEventListener("click", advance);
+dialog.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); advance(); }});
+$("skip").addEventListener("click", e=>{ e.stopPropagation(); i=LINES.length-1; setProgress(); full=LINES[i]; finish(); showCard(); });
+
+// portfolio link
+if(PORTFOLIO_URL){ go.href=PORTFOLIO_URL; }
+else{
+  go.setAttribute("aria-disabled","true");
+  go.addEventListener("click", e=>{ e.preventDefault(); note.hidden=false; note.textContent="Enlace del portfolio pendiente de añadir."; });
+}
+$("replay").addEventListener("click", e=>{
+  e.stopPropagation();
+  card.hidden=true; $("replay").hidden=true; $("nextHint").hidden=false; $("skip").hidden=false;
+  dialog.setAttribute("role","button"); dialog.setAttribute("tabindex","0");
+  $("no").hidden=false; go.textContent="Ver portfolio"; note.hidden=true;
+  i=0; setProgress(); type(LINES[0]);
+  dialog.scrollIntoView({behavior: reduce?"auto":"smooth", block:"center"});
+});
+$("no").addEventListener("click", ()=>{
+  type(DECLINE);
+  $("no").hidden=true;
+  go.textContent="Verlo igualmente";
+});
+
+setProgress();
+type(LINES[0]);
+</script>
+
+</body>
+</html>
